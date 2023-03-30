@@ -1,0 +1,104 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class MatrixDeterminantCalculator extends JFrame implements ActionListener {
+    private JTextArea inputArea;
+    private JTextField outputField;
+    private JButton calculateButton;
+
+    public MatrixDeterminantCalculator() {
+        super("Matrix Determinant Calculator");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        inputArea = new JTextArea(10, 20);
+        JScrollPane scrollPane = new JScrollPane(inputArea);
+
+        outputField = new JTextField(20);
+        outputField.setEditable(false);
+
+        calculateButton = new JButton("Calculate");
+        calculateButton.addActionListener(this);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(calculateButton, BorderLayout.SOUTH);
+
+        Container container = getContentPane();
+        container.setLayout(new BorderLayout());
+        container.add(panel, BorderLayout.CENTER);
+        container.add(outputField, BorderLayout.SOUTH);
+
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    public void actionPerformed(ActionEvent event) {
+        String inputText = inputArea.getText();
+        int[][] matrix = parseMatrix(inputText);
+
+        int size = matrix.length;
+        int determinant = matrixDet(matrix, size);
+
+        outputField.setText(Integer.toString(determinant));
+    }
+
+    private int[][] parseMatrix(String inputText) {
+        String[] rows = inputText.trim().split("\n");
+        int[][] matrix = new int[rows.length][];
+        for (int i = 0; i < rows.length; i++) {
+            String[] elements = rows[i].trim().split("\\s+");
+            matrix[i] = new int[elements.length];
+            for (int j = 0; j < elements.length; j++) {
+                matrix[i][j] = Integer.parseInt(elements[j]);
+            }
+        }
+        return matrix;
+    }
+
+    public static void main(String[] args) {
+        new MatrixDeterminantCalculator();
+    }
+
+    public static int matrixDet(int[][] matrix, int size) {
+       
+        int det = 0;
+        int degree = 1;
+
+        if (size == 1) {
+            return matrix[0][0];
+        } else if (size == 2) {
+            return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+        } else {
+            int[][] newMatrix = new int[size - 1][size - 1];
+
+            for (int j = 0; j < size; j++) {
+                getMatrixWithoutRowAndCol(matrix, size, 0, j, newMatrix);
+                det = det + (degree * matrix[0][j] * matrixDet(newMatrix, size - 1));
+                degree = -degree;
+            }
+        }
+
+        return det;
+    }
+
+    public static void getMatrixWithoutRowAndCol(int[][] matrix, int size, int row, int col, int[][] newMatrix) {
+        
+        int newRow = 0;
+        int newCol = 0;
+
+        for (int i = 0; i < size; i++) {
+            if(i != row) {
+                newCol = 0;
+                for (int j = 0; j < size; j++) {
+                    if (j != col) {
+                        newMatrix[newRow][newCol] = matrix[i][j];
+                        newCol++;
+                    }
+                }
+                newRow++;
+            }
+        }
+    }
+}
